@@ -20,7 +20,7 @@ class MFSignInScreen extends ConsumerStatefulWidget {
 
   /// Called after the submit animation's completed. Put your route transition
   /// logic here. Recommend to use with [logoTag] and [titleTag]
-  final VoidCallback? onSubmitAnimationCompleted;
+  //final VoidCallback? onSubmitAnimationCompleted;
 
   /// Hero tag for logo image. If not specified, it will simply fade out when
   /// changing route
@@ -100,7 +100,7 @@ class MFSignInScreen extends ConsumerStatefulWidget {
     this.onRecoverPassword,
     this.messages,
     this.theme,
-    this.onSubmitAnimationCompleted,
+    //this.onSubmitAnimationCompleted,
     this.logoTag,
     this.titleTag,
     this.showDebugButtons = false,
@@ -237,13 +237,17 @@ class SupabaseSignInScreenState extends ConsumerState<MFSignInScreen> {
         _isSubmitting = true;
       });
       //TODO - confirm not sign in
-      await ref.read(authRepositoryProvider).signInWithPassword(
+      String result = await ref.read(authRepositoryProvider).signInWithPassword(
           email: loginData.name, password: loginData.password);
 
       if (mounted) {
         context.pop();
       }
-      return null;
+      // extra processins, maybe too complicated and should be removed.
+      if (widget.onConfirmSignup != null) {
+        widget.onConfirmSignup!(p1, loginData);
+      }
+      return result;
     } on AuthException catch (authException) {
       print(authException.message);
       return authException.message;
@@ -268,6 +272,28 @@ class SupabaseSignInScreenState extends ConsumerState<MFSignInScreen> {
       body: FlutterLogin(
         title: widget.title,
         logo: widget.logo,
+        footer: widget.footer,
+        userType: widget.userType,
+        loginProviders: widget.loginProviders,
+        messages: widget.messages,
+        theme: widget.theme,
+        //onSubmitAnimationCompleted: widget.onSubmitAnimationCompleted,
+        logoTag: widget.logoTag,
+        titleTag: widget.titleTag,
+        showDebugButtons: widget.showDebugButtons,
+        additionalSignupFields: widget.additionalSignupFields,
+        onSwitchToAdditionalFields: widget.onSwitchToAdditionalFields,
+        confirmSignupRequired: widget.confirmSignupRequired,
+        confirmSignupKeyboardType: widget.confirmSignupKeyboardType,
+        onResendCode: widget.onResendCode,
+        savedEmail: widget.savedEmail,
+        savedPassword: widget.savedPassword,
+        termsOfService: widget.termsOfService,
+        initialAuthMode: widget.initialAuthMode,
+        children: widget.children,
+        scrollable: widget.scrollable,
+        headerWidget: widget.headerWidget,
+        initialIsoCode: widget.initialIsoCode,
         onLogin: _login,
         onSignup: _signUp,
         onConfirmSignup: _onConfirmSignUp,
