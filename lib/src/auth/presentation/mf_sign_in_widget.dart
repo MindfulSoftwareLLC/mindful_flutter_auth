@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_login/flutter_login.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mindful_flutter_auth/mindful_flutter_auth.dart';
 import 'package:mindful_flutter_auth/src/auth/data/supabase_auth_repository.dart';
 import 'package:mindful_flutter_util/mindful_flutter_util.dart';
+import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class MFSignInScreen extends ConsumerStatefulWidget {
+class MFSignInWidget extends ConsumerStatefulWidget {
   final String title;
 
   //The [ImageProvider] (like [AssetImage]) or asset path [String] for the logo image to be displayed
@@ -90,17 +91,17 @@ class MFSignInScreen extends ConsumerStatefulWidget {
   /// if not specified. This field will show ['US'] by default.
   final String? initialIsoCode;
 
-  const MFSignInScreen({
+  const MFSignInWidget({
     super.key,
     required this.title,
     required this.logo,
     this.footer,
-    required this.userType,
-    required this.loginProviders,
     this.onRecoverPassword,
     this.messages,
     this.theme,
     //this.onSubmitAnimationCompleted,
+    this.loginProviders = const [],
+    this.userType = LoginUserType.email,
     this.logoTag,
     this.titleTag,
     this.showDebugButtons = false,
@@ -126,7 +127,7 @@ class MFSignInScreen extends ConsumerStatefulWidget {
       SupabaseSignInScreenState();
 }
 
-class SupabaseSignInScreenState extends ConsumerState<MFSignInScreen> {
+class SupabaseSignInScreenState extends ConsumerState<MFSignInWidget> {
   bool _isSubmitting = false;
 
   Future<String?> _login(LoginData data) async {
@@ -265,44 +266,47 @@ class SupabaseSignInScreenState extends ConsumerState<MFSignInScreen> {
   @override
   Widget build(BuildContext context) {
     final authProviders = ref.watch(authRepositoryProvider);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sign in'),
-      ),
-      body: FlutterLogin(
-        title: widget.title,
-        logo: widget.logo,
-        footer: widget.footer,
-        userType: widget.userType,
-        loginProviders: widget.loginProviders,
-        messages: widget.messages,
-        theme: widget.theme,
-        //onSubmitAnimationCompleted: widget.onSubmitAnimationCompleted,
-        logoTag: widget.logoTag,
-        titleTag: widget.titleTag,
-        showDebugButtons: widget.showDebugButtons,
-        additionalSignupFields: widget.additionalSignupFields,
-        onSwitchToAdditionalFields: widget.onSwitchToAdditionalFields,
-        confirmSignupRequired: widget.confirmSignupRequired,
-        confirmSignupKeyboardType: widget.confirmSignupKeyboardType,
-        onResendCode: widget.onResendCode,
-        savedEmail: widget.savedEmail,
-        savedPassword: widget.savedPassword,
-        termsOfService: widget.termsOfService,
-        initialAuthMode: widget.initialAuthMode,
-        children: widget.children,
-        scrollable: widget.scrollable,
-        headerWidget: widget.headerWidget,
-        initialIsoCode: widget.initialIsoCode,
-        onLogin: _login,
-        onSignup: _signUp,
-        onConfirmSignup: _onConfirmSignUp,
-        onSubmitAnimationCompleted: () {
-          context.go('/');
+    var colorTheme = Theme.of(context).colorScheme;
+    return ProviderScope(
+      child: SupaMagicAuth(
+        onSuccess: (Session response) {
+          print('Auth success');
         },
-        onRecoverPassword: _recoverPassword,
       ),
     );
+    // return FlutterLogin(
+    //   title: widget.title,
+    //   logo: widget.logo,
+    //   footer: widget.footer,
+    //   userType: widget.userType,
+    //   loginProviders: widget.loginProviders,
+    //   messages: widget.messages,
+    //   theme: widget.theme,
+    //   //onSubmitAnimationCompleted: widget.onSubmitAnimationCompleted,
+    //   logoTag: widget.logoTag,
+    //   titleTag: widget.titleTag,
+    //   showDebugButtons: widget.showDebugButtons,
+    //   additionalSignupFields: widget.additionalSignupFields,
+    //   onSwitchToAdditionalFields: widget.onSwitchToAdditionalFields,
+    //   confirmSignupRequired: widget.confirmSignupRequired,
+    //   confirmSignupKeyboardType: widget.confirmSignupKeyboardType,
+    //   onResendCode: widget.onResendCode,
+    //   savedEmail: widget.savedEmail,
+    //   savedPassword: widget.savedPassword,
+    //   termsOfService: widget.termsOfService,
+    //   initialAuthMode: widget.initialAuthMode,
+    //   children: widget.children,
+    //   scrollable: widget.scrollable,
+    //   headerWidget: widget.headerWidget,
+    //   initialIsoCode: widget.initialIsoCode,
+    //   onLogin: _login,
+    //   onSignup: _signUp,
+    //   onConfirmSignup: _onConfirmSignUp,
+    //   onSubmitAnimationCompleted: () {
+    //     context.go('/');
+    //   },
+    //   onRecoverPassword: _recoverPassword,
+    // );
   }
 }
 
