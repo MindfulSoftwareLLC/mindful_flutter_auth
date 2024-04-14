@@ -47,10 +47,18 @@ class MFSignInWidget extends ConsumerStatefulWidget {
   final BeforeAdditionalFieldsCallback? onSwitchToAdditionalFields;
   final ConfirmRecoverCallback? onConfirmRecover;
   final ConfirmSignupCallback? onConfirmSignup;
-
-  // Additional option to decide in runtime if confirmation is required
-  // Optional
-  final ConfirmSignupRequiredCallback? confirmSignupRequired;
+  final bool confirmSignupRequired;
+  final LoginCallback? onLogin;
+  final SignupCallback? onSignupData;
+  final AdditionalFieldsCallback? onAdditionalFields;
+  final BeforeAdditionalFieldsCallback? onBeforeAdditionalFields;
+  final ProviderNeedsSignUpCallback? onProviderNeedsSignUp;
+  final ProviderAuthCallback? onProviderAuth;
+  final ProviderDirectCallback? onProviderDirectCallback;
+  final RecoverCallback? onRecover;
+  final ConfirmSignupCallback? onConfirmSignupCallback;
+  final ConfirmSignupRequiredCallback? onConfirmSignupRequired;
+  final ConfirmRecoverCallback? onConfirmRecoverCallback;
 
   /// Sets [TextInputType] of sign up confirmation form.
   ///
@@ -91,6 +99,10 @@ class MFSignInWidget extends ConsumerStatefulWidget {
   /// if not specified. This field will show ['US'] by default.
   final String? initialIsoCode;
 
+  final String? continueWithMagicLinkText;
+
+  final String? enterEmailText;
+
   const MFSignInWidget({
     super.key,
     required this.title,
@@ -106,12 +118,7 @@ class MFSignInWidget extends ConsumerStatefulWidget {
     this.titleTag,
     this.showDebugButtons = false,
     this.additionalSignupFields,
-    this.onSwitchToAdditionalFields,
-    this.onConfirmRecover,
-    this.onConfirmSignup,
-    this.confirmSignupRequired,
-    this.confirmSignupKeyboardType,
-    this.onResendCode,
+    required this.onResendCode,
     this.savedEmail = '',
     this.savedPassword = '',
     this.termsOfService = const <TermOfService>[],
@@ -120,6 +127,24 @@ class MFSignInWidget extends ConsumerStatefulWidget {
     this.scrollable = false,
     this.headerWidget,
     this.initialIsoCode,
+    this.continueWithMagicLinkText,
+    this.enterEmailText,
+    required this.onLogin,
+    this.onConfirmRecover,
+    this.onConfirmSignup,
+    this.confirmSignupRequired = true,
+    this.onConfirmRecoverCallback,
+    this.onSignupData,
+    this.onSwitchToAdditionalFields,
+    this.confirmSignupKeyboardType,
+    this.onAdditionalFields,
+    this.onBeforeAdditionalFields,
+    this.onProviderNeedsSignUp,
+    this.onProviderAuth,
+    this.onProviderDirectCallback,
+    this.onRecover,
+    this.onConfirmSignupCallback,
+    this.onConfirmSignupRequired,
   });
 
   @override
@@ -190,6 +215,7 @@ class SupabaseSignInScreenState extends ConsumerState<MFSignInWidget> {
     }
   }
 
+  Future<void> _onConfirmRecover() async {}
   Future<String?> _recoverPassword(String name) async {
     debugPrint('Recover password Name: ${name}');
     return null;
@@ -267,11 +293,40 @@ class SupabaseSignInScreenState extends ConsumerState<MFSignInWidget> {
   Widget build(BuildContext context) {
     final authProviders = ref.watch(authRepositoryProvider);
     var colorTheme = Theme.of(context).colorScheme;
+    Widget? logoWidget;
+    if (widget.logo is Widget) {
+      logoWidget = widget.logo;
+    } else if (widget.logo is String) {
+      logoWidget = SizedBox(
+          height: 150,
+          child: Image.asset(
+            widget.logo,
+            fit: BoxFit.scaleDown,
+          ));
+    } else {
+      logoWidget = SizedBox.fromSize();
+    }
     return ProviderScope(
-      child: SupaMagicAuth(
-        onSuccess: (Session response) {
-          print('Auth success');
-        },
+      child: Column(
+        children: [
+          '${widget.title}'.isEmpty
+              ? SizedBox.fromSize()
+              : Subtitle1(widget.title),
+          logoWidget!,
+          SupaMagicAuth(
+            localization: SupaMagicAuthLocalization(
+              enterEmail: widget.enterEmailText ?? 'Enter your email',
+              continueWithMagicLink: widget.continueWithMagicLinkText ??
+                  'Sign in/Sign up fast with a Magic Link',
+            ),
+            onSuccess: (Session response) {
+              print('Auth success $response');
+            },
+            onError: (error) {
+              print('Auth error $error');
+            },
+          ),
+        ],
       ),
     );
     // return FlutterLogin(
@@ -309,32 +364,32 @@ class SupabaseSignInScreenState extends ConsumerState<MFSignInWidget> {
     // );
   }
 }
-
-class SignInMagicLinkFooter extends ConsumerWidget {
-  const SignInMagicLinkFooter({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      children: [
-        const SizedBox(height: 8),
-        Row(
-          children: const [
-            Expanded(child: Divider()),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text('or'),
-            ),
-            Expanded(child: Divider()),
-          ],
-        ),
-        TextButton(
-          onPressed: () => ref
-              .read(authRepositoryProvider)
-              .signInWithOtp(email: 'michael@mindfulnomad.org'),
-          child: const Text('Sign with email magic link.'),
-        ),
-      ],
-    );
-  }
-}
+//
+// class SignInMagicLinkFooter extends ConsumerWidget {
+//   const SignInMagicLinkFooter({super.key});
+//
+//   @override
+//   Widget build(BuildContext context, WidgetRef ref) {
+//     return Column(
+//       children: [
+//         const SizedBox(height: 8),
+//         Row(
+//           children: const [
+//             Expanded(child: Divider()),
+//             Padding(
+//               padding: EdgeInsets.symmetric(horizontal: 8.0),
+//               child: Text('or'),
+//             ),
+//             Expanded(child: Divider()),
+//           ],
+//         ),
+//         TextButton(
+//           onPressed: () => ref
+//               .read(authRepositoryProvider)
+//               .signInWithOtp(email: 'michael@mindfulnomad.org'),
+//           child: const Text('Sign with email magic link.'),
+//         ),
+//       ],
+//     );
+//   }
+// }
