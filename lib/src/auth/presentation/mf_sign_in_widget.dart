@@ -7,6 +7,8 @@ import 'package:mindful_flutter_util/mindful_flutter_util.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'mf_supa_magic_auth.dart';
+
 class MFSignInWidget extends ConsumerStatefulWidget {
   final String title;
 
@@ -103,6 +105,10 @@ class MFSignInWidget extends ConsumerStatefulWidget {
 
   final String? enterEmailText;
 
+  final bool clipLogo;
+
+  final Map<String, dynamic> userMetaData;
+
   const MFSignInWidget({
     super.key,
     required this.title,
@@ -114,6 +120,7 @@ class MFSignInWidget extends ConsumerStatefulWidget {
     //this.onSubmitAnimationCompleted,
     this.loginProviders = const [],
     this.userType = LoginUserType.email,
+    required this.userMetaData,
     this.logoTag,
     this.titleTag,
     this.showDebugButtons = false,
@@ -145,6 +152,7 @@ class MFSignInWidget extends ConsumerStatefulWidget {
     this.onRecover,
     this.onConfirmSignupCallback,
     this.onConfirmSignupRequired,
+    this.clipLogo = false,
   });
 
   @override
@@ -306,14 +314,16 @@ class SupabaseSignInScreenState extends ConsumerState<MFSignInWidget> {
     } else {
       logoWidget = SizedBox.fromSize();
     }
+    if (widget.clipLogo) {
+      logoWidget = ClipRRect(
+          borderRadius: BorderRadius.circular(999), child: logoWidget);
+    }
     return ProviderScope(
       child: Column(
         children: [
-          '${widget.title}'.isEmpty
-              ? SizedBox.fromSize()
-              : Subtitle1(widget.title),
+          widget.title.isEmpty ? SizedBox.fromSize() : Subtitle1(widget.title),
           logoWidget!,
-          SupaMagicAuth(
+          MFSupaMagicAuth(
             localization: SupaMagicAuthLocalization(
               enterEmail: widget.enterEmailText ?? 'Enter your email',
               continueWithMagicLink: widget.continueWithMagicLinkText ??
@@ -325,6 +335,7 @@ class SupabaseSignInScreenState extends ConsumerState<MFSignInWidget> {
             onError: (error) {
               print('Auth error $error');
             },
+            metadata: widget.userMetaData,
           ),
         ],
       ),

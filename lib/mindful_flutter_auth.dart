@@ -5,6 +5,7 @@ library;
 
 export 'src/mindful_flutter_auth_base.dart';
 export 'src/auth/data/supabase_auth_repository.dart';
+export 'src/auth/data/auth_secure_storage.dart';
 export 'src/auth/presentation/auth_providers.dart';
 export 'src/auth/presentation/custom_profile_screen.dart';
 export 'src/auth/presentation/session_check_spinner.dart';
