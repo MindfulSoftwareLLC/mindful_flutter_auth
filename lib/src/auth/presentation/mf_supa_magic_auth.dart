@@ -14,7 +14,7 @@ class MFSupaMagicAuth extends StatefulWidget {
   final String? redirectUrl;
 
   /// Method to be called when the auth action is success
-  final void Function(Session response) onSuccess;
+  final void Function() onSuccess;
 
   /// Method to be called when the auth action threw an excepction
   final void Function(Object error)? onError;
@@ -24,14 +24,16 @@ class MFSupaMagicAuth extends StatefulWidget {
 
   final Map<String, dynamic> metadata;
 
-  const MFSupaMagicAuth({
-    super.key,
-    this.redirectUrl,
-    required this.onSuccess,
-    this.onError,
-    this.localization = const SupaMagicAuthLocalization(),
-    required this.metadata,
-  });
+  final bool showSnackBarOnSuccess;
+
+  const MFSupaMagicAuth(
+      {super.key,
+      this.redirectUrl,
+      required this.onSuccess,
+      this.onError,
+      this.localization = const SupaMagicAuthLocalization(),
+      required this.metadata,
+      this.showSnackBarOnSuccess = true});
 
   @override
   State<MFSupaMagicAuth> createState() => _MFSupaMagicAuthState();
@@ -40,26 +42,12 @@ class MFSupaMagicAuth extends StatefulWidget {
 class _MFSupaMagicAuthState extends State<MFSupaMagicAuth> {
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
-  late final StreamSubscription<AuthState> _gotrueSubscription;
 
   bool _isLoading = false;
 
   @override
-  void initState() {
-    super.initState();
-    _gotrueSubscription =
-        Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-      final session = data.session;
-      if (session != null && mounted) {
-        widget.onSuccess(session);
-      }
-    });
-  }
-
-  @override
   void dispose() {
     _email.dispose();
-    _gotrueSubscription.cancel();
     super.dispose();
   }
 
@@ -116,9 +104,10 @@ class _MFSupaMagicAuthState extends State<MFSupaMagicAuth> {
                   emailRedirectTo: widget.redirectUrl,
                   data: widget.metadata,
                 );
-                if (context.mounted) {
+                if (context.mounted && widget.showSnackBarOnSuccess) {
                   context.showSnackBar(localization.checkYourEmail);
                 }
+                widget.onSuccess();
               } on AuthException catch (error) {
                 if (widget.onError == null && context.mounted) {
                   context.showErrorSnackBar(error.message);
