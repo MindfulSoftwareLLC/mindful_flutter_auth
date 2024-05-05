@@ -114,7 +114,7 @@ class MFSignInWidgetState extends State<MFSignInWidget> {
     } else if (widget.logo is String) {
       logoWidget = SizedBox(
           height: 150,
-          child: Image.asset(
+          child: Image.network(
             widget.logo,
             fit: BoxFit.scaleDown,
           ));
