@@ -1,44 +1,24 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:mindful_flutter_auth/mindful_flutter_auth.dart';
 import 'package:mindful_flutter_util/mindful_flutter_util.dart';
+import 'package:supabase_auth_ui/src/utils/constants.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'mf_supa_magic_auth.dart';
+import '../../../mindful_flutter_auth.dart';
 
-/*
-                      onConfirmSignup: (p0, p1) {
-                        if (kDebugMode) {
-                          print('On confirm signup $p0, $p1');
-                        }
-                        return null;
-                      },
-                      onResendCode: (SignupData signupData) {
-                        if (kDebugMode) {
-                          print('TODO remove me');
-                        }
-                        return null;
-                      },
-                      onLogin: (LoginData loginData) {
-                        if (kDebugMode) {
-                          print('on login $loginData');
-                        }
-                        return null;
-                      },
-
- */
 /// The callback triggered after signup
 /// The result is an error message, callback successes if message is null
 typedef SignupErrorCallback = Future<void>? Function(dynamic);
 
+enum LoginService { supabase, firebase }
+
 class MFSignInWidget extends StatefulWidget {
-  final String emailRedirectTo;
   final String title;
   final dynamic logo;
-  final bool showSnackBarOnSuccess;
   final VoidCallback? onSuccess;
   final SignupErrorCallback? onError;
+  final LoginService loginService;
 
   /// Called after the submit animation's completed. Put your route transition
   /// logic here. Recommend to use with [logoTag] and [titleTag]
@@ -68,24 +48,26 @@ class MFSignInWidget extends StatefulWidget {
   /// A widget that can be placed on top of the loginCard.
   final Widget? headerWidget;
 
-  /// The initial Iso Code for the widget to show using [LoginUserType.intlPhone].
-  /// if not specified. This field will show ['US'] by default.
-  final String? initialIsoCode;
-
-  final String? continueWithMagicLinkText;
-
   final String? enterEmailText;
 
   final bool clipLogo;
 
   final Map<String, dynamic> userMetaData;
+  final String redirectUrl;
+
+  final bool showSnackBarOnSuccess;
+  final bool showSnackBarOnError;
+  final String checkYourEmailText;
+  final String unexpectedErrorText;
+
+  final Map<String, dynamic>? metadata;
 
   const MFSignInWidget(
       {super.key,
-      required this.emailRedirectTo,
+      required this.loginService,
+      required this.redirectUrl,
       required this.title,
       required this.logo,
-      //this.onSubmitAnimationCompleted,
       required this.userMetaData,
       required this.onSuccess,
       required this.onError,
@@ -95,11 +77,13 @@ class MFSignInWidget extends StatefulWidget {
       this.children,
       this.scrollable = false,
       this.headerWidget,
-      this.initialIsoCode,
-      this.continueWithMagicLinkText,
       this.enterEmailText,
       this.clipLogo = false,
-      this.showSnackBarOnSuccess = true});
+      this.showSnackBarOnSuccess = true,
+      this.showSnackBarOnError = true,
+      this.unexpectedErrorText = 'Unexpected Error:',
+      this.checkYourEmailText = 'Check your email for a link to log in',
+      this.metadata = const {}});
 
   @override
   State<StatefulWidget> createState() => MFSignInWidgetState();
@@ -125,93 +109,76 @@ class MFSignInWidgetState extends State<MFSignInWidget> {
       logoWidget = ClipRRect(
           borderRadius: BorderRadius.circular(999), child: logoWidget);
     }
-    return ProviderScope(
-      child: Column(
-        children: [
-          widget.title.isEmpty ? SizedBox.fromSize() : Subtitle1(widget.title),
-          logoWidget!,
-          MFSupaMagicAuth(
-            redirectUrl: widget.emailRedirectTo,
-            showSnackBarOnSuccess: widget.showSnackBarOnSuccess,
-            localization: SupaMagicAuthLocalization(
-              enterEmail: widget.enterEmailText ?? 'Enter your email',
-              continueWithMagicLink: widget.continueWithMagicLinkText ??
-                  'Sign in/Sign up fast with a Magic Link',
-            ),
-            onSuccess: () {
+    return Column(
+      children: [
+        widget.title.isEmpty ? SizedBox.fromSize() : Subtitle1(widget.title),
+        logoWidget!,
+        MFMagicLinkLogin(
+          onSendMagicLink: (String email) {
+            try {
+              sendMagicLink(email);
               print('Auth success');
               if (widget.onSuccess != null) widget.onSuccess!();
-            },
-            onError: (error) {
-              print('Auth error $error');
-              if (widget.onError != null) widget.onError!(error);
-            },
-            metadata: widget.userMetaData,
-          ),
-        ],
-      ),
+            } catch (e) {
+              print('Auth error $e');
+              if (widget.onError != null) widget.onError!(e);
+            }
+            return;
+          },
+          metadata: widget.userMetaData,
+        ),
+      ],
     );
-    // return FlutterLogin(
-    //   title: widget.title,
-    //   logo: widget.logo,
-    //   footer: widget.footer,
-    //   userType: widget.userType,
-    //   loginProviders: widget.loginProviders,
-    //   messages: widget.messages,
-    //   theme: widget.theme,
-    //   //onSubmitAnimationCompleted: widget.onSubmitAnimationCompleted,
-    //   logoTag: widget.logoTag,
-    //   titleTag: widget.titleTag,
-    //   showDebugButtons: widget.showDebugButtons,
-    //   additionalSignupFields: widget.additionalSignupFields,
-    //   onSwitchToAdditionalFields: widget.onSwitchToAdditionalFields,
-    //   confirmSignupRequired: widget.confirmSignupRequired,
-    //   confirmSignupKeyboardType: widget.confirmSignupKeyboardType,
-    //   onResendCode: widget.onResendCode,
-    //   savedEmail: widget.savedEmail,
-    //   savedPassword: widget.savedPassword,
-    //   termsOfService: widget.termsOfService,
-    //   initialAuthMode: widget.initialAuthMode,
-    //   children: widget.children,
-    //   scrollable: widget.scrollable,
-    //   headerWidget: widget.headerWidget,
-    //   initialIsoCode: widget.initialIsoCode,
-    //   onLogin: _login,
-    //   onSignup: _signUp,
-    //   onConfirmSignup: _onConfirmSignUp,
-    //   onSubmitAnimationCompleted: () {
-    //     context.go('/');
-    //   },
-    //   onRecoverPassword: _recoverPassword,
-    // );
+  }
+
+  void sendMagicLink(String email) async {
+    try {
+      switch (widget.loginService) {
+        case LoginService.supabase:
+          {
+            await signInWithSupabaseOtp(email);
+            break;
+          }
+        case LoginService.firebase:
+          {
+            await signInWithFirebaseOtp(email);
+            break;
+          }
+      }
+      if (context.mounted && widget.showSnackBarOnSuccess) {
+        context.showSnackBar(widget.checkYourEmailText);
+      }
+    } on AuthException catch (error) {
+      if (widget.onError == null && context.mounted) {
+        context.showErrorSnackBar(error.message);
+      } else {
+        widget.onError?.call(error);
+      }
+    } catch (error, stack) {
+      debugPrint('Error signing in with Otp/magic email link: $error');
+      debugPrintStack(stackTrace: stack);
+      if (widget.onError == null &&
+          context.mounted &&
+          widget.showSnackBarOnError) {
+        context.showErrorSnackBar('${widget.unexpectedErrorText}: $error');
+      } else {
+        widget.onError?.call(error);
+      }
+    }
+  }
+
+  Future<void> signInWithSupabaseOtp(String email) {
+    return supabase.auth.signInWithOtp(
+      email: email,
+      emailRedirectTo: widget.redirectUrl,
+      data: widget.metadata,
+    );
+  }
+
+  Future<void> signInWithFirebaseOtp(String email) {
+    return FirebaseAuth.instance.signInWithEmailLink(
+      email: email,
+      emailLink: widget.redirectUrl,
+    );
   }
 }
-//
-// class SignInMagicLinkFooter extends ConsumerWidget {
-//   const SignInMagicLinkFooter({super.key});
-//
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     return Column(
-//       children: [
-//         const SizedBox(height: 8),
-//         Row(
-//           children: const [
-//             Expanded(child: Divider()),
-//             Padding(
-//               padding: EdgeInsets.symmetric(horizontal: 8.0),
-//               child: Text('or'),
-//             ),
-//             Expanded(child: Divider()),
-//           ],
-//         ),
-//         TextButton(
-//           onPressed: () => ref
-//               .read(authRepositoryProvider)
-//               .signInWithOtp(email: 'michael@mindfulnomad.org'),
-//           child: const Text('Sign with email magic link.'),
-//         ),
-//       ],
-//     );
-//   }
-// }

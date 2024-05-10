@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../mindful_flutter_auth.dart';
-
 class UserFormField {
   /// The name of the field retrieved as key.
   /// Please ensure this is unique, otherwise an Error will be thrown
@@ -22,9 +20,9 @@ class UserFormField {
 
   final String? linkUrl;
 
-  /// The LoginUserType of the form. The right keyboard and suggestions will be shown accordingly
-  /// Defaults to LoginUserType.user
-  final LoginUserType userType;
+  // /// The LoginUserType of the form. The right keyboard and suggestions will be shown accordingly
+  // /// Defaults to LoginUserType.user
+  // final LoginUserType userType;
 
   final InlineSpan? tooltip;
 
@@ -35,7 +33,7 @@ class UserFormField {
     this.linkUrl,
     this.icon,
     this.fieldValidator,
-    this.userType = LoginUserType.name,
+    //this.userType = LoginUserType.name,
     this.tooltip,
   }) : displayName = displayName ?? keyName;
 }

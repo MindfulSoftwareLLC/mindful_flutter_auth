@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mindful_flutter_auth/src/auth/presentation/session_check_spinner.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SessionSplashPage extends StatefulWidget {
   final String routeWithSession;
@@ -31,12 +29,12 @@ class SessionSplashPageState extends State<SessionSplashPage> {
       return;
     }
 
-    final session = Supabase.instance.client.auth.currentSession;
-    if (session != null) {
-      context.go(widget.routeWithSession);
-    } else {
-      context.go(widget.routeWithoutSession);
-    }
+    //TODOfinal session = Supabase.instance.client.auth.currentSession;
+    // if (session != null) {
+    //   context.go(widget.routeWithSession);
+    // } else {
+    //   context.go(widget.routeWithoutSession);
+    // }
   }
 
   @override

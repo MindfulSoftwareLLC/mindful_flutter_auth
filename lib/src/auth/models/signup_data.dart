@@ -1,23 +1,21 @@
 import 'package:quiver/core.dart';
 
-import '../../../mindful_flutter_auth.dart';
-
 class SignupData {
   final String? name;
   final String? password;
-  final List<TermOfServiceResult> termsOfService;
+//  final List<TermOfServiceResult> termsOfService;
   final Map<String, String>? additionalSignupData;
 
   SignupData.fromSignupForm({
     required this.name,
     required this.password,
     this.additionalSignupData,
-    this.termsOfService = const [],
+    //  this.termsOfService = const [],
   });
 
   SignupData.fromProvider({
     required this.additionalSignupData,
-    this.termsOfService = const [],
+    //this.termsOfService = const [],
   })  : name = null,
         password = null;
 

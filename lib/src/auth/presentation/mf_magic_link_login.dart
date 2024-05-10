@@ -1,45 +1,40 @@
-import 'dart:async';
-
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_auth_ui/src/localizations/supa_magic_auth_localization.dart';
-import 'package:supabase_auth_ui/src/utils/constants.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+
+typedef SendMagicLinkCallback = Function(String email);
 
 /// UI component to create magic link login form
-class MFSupaMagicAuth extends StatefulWidget {
+class MFMagicLinkLogin extends StatefulWidget {
   /// `redirectUrl` to be passed to the `.signIn()` or `signUp()` methods
   ///
   /// Typically used to pass a DeepLink
   final String? redirectUrl;
 
   /// Method to be called when the auth action is success
-  final void Function() onSuccess;
-
-  /// Method to be called when the auth action threw an excepction
-  final void Function(Object error)? onError;
-
-  /// Localization for the form
-  final SupaMagicAuthLocalization localization;
+  final SendMagicLinkCallback onSendMagicLink;
 
   final Map<String, dynamic> metadata;
 
   final bool showSnackBarOnSuccess;
+  final String invalidEmailErrorText;
+  final String enterEmailText;
+  final String buttonText;
 
-  const MFSupaMagicAuth(
+  const MFMagicLinkLogin(
       {super.key,
       this.redirectUrl,
-      required this.onSuccess,
-      this.onError,
-      this.localization = const SupaMagicAuthLocalization(),
+      required this.onSendMagicLink,
       required this.metadata,
-      this.showSnackBarOnSuccess = true});
+      this.showSnackBarOnSuccess = true,
+      this.invalidEmailErrorText = 'Invalid email',
+      this.enterEmailText = 'Enter email.',
+      this.buttonText = 'Sign in or Sign up.'});
 
   @override
-  State<MFSupaMagicAuth> createState() => _MFSupaMagicAuthState();
+  State<MFMagicLinkLogin> createState() => _MFMagicLinkLoginState();
 }
 
-class _MFSupaMagicAuthState extends State<MFSupaMagicAuth> {
+class _MFMagicLinkLoginState extends State<MFMagicLinkLogin> {
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
 
@@ -53,7 +48,6 @@ class _MFSupaMagicAuthState extends State<MFSupaMagicAuth> {
 
   @override
   Widget build(BuildContext context) {
-    final localization = widget.localization;
     return Form(
       key: _formKey,
       child: Column(
@@ -66,17 +60,17 @@ class _MFSupaMagicAuthState extends State<MFSupaMagicAuth> {
               if (value == null ||
                   value.isEmpty ||
                   !EmailValidator.validate(_email.text)) {
-                return localization.validEmailError;
+                return widget.invalidEmailErrorText;
               }
               return null;
             },
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.email),
-              label: Text(localization.enterEmail),
+              label: Text(widget.enterEmailText),
             ),
             controller: _email,
           ),
-          spacer(16),
+          SizedBox(height: 16),
           ElevatedButton(
             child: (_isLoading)
                 ? SizedBox(
@@ -88,7 +82,7 @@ class _MFSupaMagicAuthState extends State<MFSupaMagicAuth> {
                     ),
                   )
                 : Text(
-                    localization.continueWithMagicLink,
+                    widget.buttonText,
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
             onPressed: () async {
@@ -98,36 +92,13 @@ class _MFSupaMagicAuthState extends State<MFSupaMagicAuth> {
               setState(() {
                 _isLoading = true;
               });
-              try {
-                await supabase.auth.signInWithOtp(
-                  email: _email.text,
-                  emailRedirectTo: widget.redirectUrl,
-                  data: widget.metadata,
-                );
-                if (context.mounted && widget.showSnackBarOnSuccess) {
-                  context.showSnackBar(localization.checkYourEmail);
-                }
-                widget.onSuccess();
-              } on AuthException catch (error) {
-                if (widget.onError == null && context.mounted) {
-                  context.showErrorSnackBar(error.message);
-                } else {
-                  widget.onError?.call(error);
-                }
-              } catch (error) {
-                if (widget.onError == null && context.mounted) {
-                  context.showErrorSnackBar(
-                      '${localization.unexpectedError}: $error');
-                } else {
-                  widget.onError?.call(error);
-                }
-              }
+              await widget.onSendMagicLink(_email.text);
               setState(() {
                 _isLoading = false;
               });
             },
           ),
-          spacer(10),
+          SizedBox(height: 10),
         ],
       ),
     );

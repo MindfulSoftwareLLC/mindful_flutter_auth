@@ -9,7 +9,13 @@ environment:
 dependencies:
   flutter_animate: ^4.5.0
   flutter_secure_storage: ^9.0.0
-  go_router: ^14.0.1
+  firebase_auth: ^4.19.4
+  firebase_core: ^2.30.1
+  firebase_ui_auth: ^1.14.0
+  firebase_ui_firestore: ^1.6.3
+  firebase_ui_oauth: ^1.5.2
+  firebase_ui_oauth_google: ^1.3.2
+  go_router: ^14.0.2
   mindful_flutter_util:
       path: ../mindful_flutter_util
   quiver: ^3.2.1
