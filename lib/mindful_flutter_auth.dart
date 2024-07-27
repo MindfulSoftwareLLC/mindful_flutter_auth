@@ -5,6 +5,7 @@ library;
 
 export './src/auth/data/auth_secure_storage.dart';
 export './src/auth/presentation/custom_profile_screen.dart';
+export './src/auth/presentation/firebase_social_auth.dart';
 export './src/auth/presentation/mf_magic_link_login.dart';
 export './src/auth/presentation/mf_sign_in_widget.dart';
 export './src/auth/presentation/session_check_spinner.dart';

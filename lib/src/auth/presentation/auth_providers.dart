@@ -1,16 +1,23 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart' as fbAuthUI;
+import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
-//part 'auth_providers.g.dart';
+part 'auth_providers.g.dart';
 
-// @Riverpod(keepAlive: true)
-// List<AuthProvider<AuthListener, AuthCredential>> authProviders(
-//     AuthProvidersRef ref) {
-//   return [EmailAuthProvider(), GoogleProvider(clientId: '')];
-// }
+@Riverpod(keepAlive: true)
+List<fbAuthUI.AuthProvider<fbAuthUI.AuthListener, AuthCredential>>
+    fbAuthProviders(FbAuthProvidersRef ref) {
+  return [fbAuthUI.EmailAuthProvider(), GoogleProvider(clientId: '')];
+}
 
-final authStateProvider = StreamProvider<AuthState?>(
-  (ref) => Supabase.instance.client.auth.onAuthStateChange,
+// final fbAuthStateProvider = StreamProvider<fbAuthUI.AuthState?>(
+//       (ref) => fbAuthUI.FirebaseUIAuth.providersFor().client.auth.onAuthStateChange,
+// );
+
+final supabaseAuthStateProvider = StreamProvider<supabase.AuthState?>(
+  (ref) => supabase.Supabase.instance.client.auth.onAuthStateChange,
 );
 //
 // final actionCodeSettings = ActionCodeSettings(

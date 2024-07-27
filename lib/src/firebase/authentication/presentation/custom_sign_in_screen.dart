@@ -2,7 +2,7 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../mindful_flutter_auth.dart';
+import '../../../auth/presentation/auth_providers.dart';
 
 class CustomSignInScreen extends ConsumerWidget {
   const CustomSignInScreen(
@@ -14,7 +14,7 @@ class CustomSignInScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authProviders = ref.watch(authProvidersProvider);
+    final authProviders = ref.watch(fbAuthProvidersProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text(signInText),
@@ -36,13 +36,13 @@ class CustomSignInScreen extends ConsumerWidget {
   }
 }
 
-class SignInAnonymouslyFooter extends ConsumerWidget {
+class SignInAnonymouslyFooter extends StatelessWidget {
   const SignInAnonymouslyFooter(
       {super.key, this.signInAnonymouslyText = 'Sign in anonymously'});
   final String signInAnonymouslyText;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         const SizedBox(height: 8),
@@ -57,7 +57,8 @@ class SignInAnonymouslyFooter extends ConsumerWidget {
           ],
         ),
         TextButton(
-          onPressed: () => ref.read(firebaseAuthProvider).signInAnonymously(),
+          onPressed: () => throw Exception(
+              'Unimplemented'), //GetIt.I.read(firebaseAuthProvider).signInAnonymously(),
           child: Text(signInAnonymouslyText),
         ),
       ],

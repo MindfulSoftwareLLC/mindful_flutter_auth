@@ -1,8 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fbAuth
+    hide EmailAuthProvider;
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:flutter/material.dart';
 import 'package:mindful_flutter_util/mindful_flutter_util.dart';
 import 'package:supabase_auth_ui/src/utils/constants.dart';
-import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../mindful_flutter_auth.dart';
@@ -16,7 +18,8 @@ enum LoginService { supabase, firebase }
 class MFSignInWidget extends StatefulWidget {
   final String title;
   final dynamic logo;
-  final VoidCallback? onSuccess;
+  final List<MFOAuthProvider> socialProviders;
+  final void Function(Object? user) onSuccess;
   final SignupErrorCallback? onError;
   final LoginService loginService;
 
@@ -59,31 +62,41 @@ class MFSignInWidget extends StatefulWidget {
   final bool showSnackBarOnError;
   final String checkYourEmailText;
   final String unexpectedErrorText;
-
+  final String googleWebClientId;
+  final String? nativeGoogleWebClientId;
+  final String? nativeGoogleIosClientId;
   final Map<String, dynamic>? metadata;
+  final List<AuthProvider> providers;
 
-  const MFSignInWidget(
-      {super.key,
-      required this.loginService,
-      required this.redirectUrl,
-      required this.title,
-      required this.logo,
-      required this.userMetaData,
-      required this.onSuccess,
-      required this.onError,
-      this.logoTag,
-      this.titleTag,
-      this.savedEmail = '',
-      this.children,
-      this.scrollable = false,
-      this.headerWidget,
-      this.enterEmailText,
-      this.clipLogo = false,
-      this.showSnackBarOnSuccess = true,
-      this.showSnackBarOnError = true,
-      this.unexpectedErrorText = 'Unexpected Error:',
-      this.checkYourEmailText = 'Check your email for a link to log in',
-      this.metadata = const {}});
+  const MFSignInWidget({
+    super.key,
+    this.loginService =
+        LoginService.firebase, //not supporting supabase right now
+    required this.providers,
+    required this.socialProviders,
+    required this.googleWebClientId,
+    this.nativeGoogleWebClientId,
+    this.nativeGoogleIosClientId,
+    required this.redirectUrl,
+    required this.title,
+    required this.logo,
+    required this.userMetaData,
+    required this.onSuccess,
+    required this.onError,
+    this.logoTag,
+    this.titleTag,
+    this.savedEmail = '',
+    this.children,
+    this.scrollable = false,
+    this.headerWidget,
+    this.enterEmailText,
+    this.clipLogo = false,
+    this.showSnackBarOnSuccess = true,
+    this.showSnackBarOnError = true,
+    this.unexpectedErrorText = 'Unexpected Error:',
+    this.checkYourEmailText = 'Check your email for a link to log in',
+    this.metadata = const {},
+  });
 
   @override
   State<StatefulWidget> createState() => MFSignInWidgetState();
@@ -113,20 +126,51 @@ class MFSignInWidgetState extends State<MFSignInWidget> {
       children: [
         widget.title.isEmpty ? SizedBox.fromSize() : Subtitle1(widget.title),
         logoWidget!,
-        MFMagicLinkLogin(
-          onSendMagicLink: (String email) {
-            try {
-              sendMagicLink(email);
-              print('Auth success');
-              if (widget.onSuccess != null) widget.onSuccess!();
-            } catch (e) {
-              print('Auth error $e');
-              if (widget.onError != null) widget.onError!(e);
-            }
-            return;
-          },
-          metadata: widget.userMetaData,
-        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SizedBox(
+            height: 150,
+            width: 400,
+            child: Column(children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GoogleSignInButton(
+                  clientId: widget.googleWebClientId,
+                  loadingIndicator: CircularProgressIndicator(),
+                ),
+              )
+            ]),
+            // SignInScreen(
+            //   providers: widget.providers,
+            // ),
+          ),
+        )
+        // MFOAuthLoginButtons(
+        //   nativeGoogleWebClientId: widget.nativeGoogleWebClientId,
+        //   nativeGoogleIosClientId: widget.nativeGoogleIosClientId,
+        //   onOAuthCallback: (provider) {
+        //     print('OAuth success');
+        //     if (widget.onSuccess != null) widget.onSuccess!(null);
+        //   },
+        //   metadata: {},
+        //   loginService: widget.loginService,
+        //   socialProviders: widget.socialProviders,
+        //   onSuccess: widget.onSuccess,
+        // ),
+        // MFMagicLinkLogin(
+        //   onSendMagicLink: (String email) {
+        //     try {
+        //       sendMagicLink(email);
+        //       print('Auth success');
+        //       if (widget.onSuccess != null) widget.onSuccess!(null);
+        //     } catch (e) {
+        //       print('Auth error $e');
+        //       if (widget.onError != null) widget.onError!(e);
+        //     }
+        //     return;
+        //   },
+        //   metadata: widget.userMetaData,
+        // ),
       ],
     );
   }
@@ -136,17 +180,17 @@ class MFSignInWidgetState extends State<MFSignInWidget> {
       switch (widget.loginService) {
         case LoginService.supabase:
           {
-            await signInWithSupabaseOtp(email);
+            await signInWithFirebaseOtp(email);
             break;
           }
         case LoginService.firebase:
           {
-            await signInWithFirebaseOtp(email);
+            await sendSignInLinkToEmail(email);
             break;
           }
       }
       if (context.mounted && widget.showSnackBarOnSuccess) {
-        context.showSnackBar(widget.checkYourEmailText);
+        context.displaySnackBar(widget.checkYourEmailText);
       }
     } on AuthException catch (error) {
       if (widget.onError == null && context.mounted) {
@@ -167,18 +211,37 @@ class MFSignInWidgetState extends State<MFSignInWidget> {
     }
   }
 
+  Future<void> sendSignInLinkToEmail(String email) {
+    try {
+      return fbAuth.FirebaseAuth.instance.sendSignInLinkToEmail(
+        email: email,
+        actionCodeSettings: fbAuth.ActionCodeSettings(
+            url: widget.redirectUrl, handleCodeInApp: true),
+      );
+    } catch (e, s) {
+      print(
+          'Error signing in $email in with firebase email with redirectUrl ${widget.redirectUrl}: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> signInWithFirebaseOtp(String email) {
+    try {
+      return fbAuth.FirebaseAuth.instance.signInWithEmailLink(
+        email: email,
+        emailLink: widget.redirectUrl,
+      );
+    } catch (e, s) {
+      print('Error signging in with firebase otp: $e');
+      rethrow;
+    }
+  }
+
   Future<void> signInWithSupabaseOtp(String email) {
     return supabase.auth.signInWithOtp(
       email: email,
       emailRedirectTo: widget.redirectUrl,
       data: widget.metadata,
-    );
-  }
-
-  Future<void> signInWithFirebaseOtp(String email) {
-    return FirebaseAuth.instance.signInWithEmailLink(
-      email: email,
-      emailLink: widget.redirectUrl,
     );
   }
 }

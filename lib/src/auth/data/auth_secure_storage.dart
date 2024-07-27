@@ -1,8 +1,8 @@
 // Define the custom LocalStorage implementation
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:supabase_auth_ui/supabase_auth_ui.dart';
+import 'package:mindful_flutter_auth/src/storage/local_storage.dart';
 
-class SupabaseAuthSecureStorage extends LocalStorage {
+class AuthSecureStorage extends LocalStorage {
   final storage = FlutterSecureStorage();
 
   @override
