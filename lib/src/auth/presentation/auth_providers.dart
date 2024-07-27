@@ -12,9 +12,9 @@ List<fbAuthUI.AuthProvider<fbAuthUI.AuthListener, AuthCredential>>
   return [fbAuthUI.EmailAuthProvider(), GoogleProvider(clientId: '')];
 }
 
-// final fbAuthStateProvider = StreamProvider<fbAuthUI.AuthState?>(
-//       (ref) => fbAuthUI.FirebaseUIAuth.providersFor().client.auth.onAuthStateChange,
-// );
+final fbAuthStateProvider = StreamProvider<User?>(
+  (ref) => FirebaseAuth.instance.authStateChanges(),
+);
 
 final supabaseAuthStateProvider = StreamProvider<supabase.AuthState?>(
   (ref) => supabase.Supabase.instance.client.auth.onAuthStateChange,

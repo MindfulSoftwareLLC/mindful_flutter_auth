@@ -1,8 +1,6 @@
-Future<bool> hasAccessToken(_) => throw UnimplementedError();
-
-Future<String?> accessToken(_) async => throw UnimplementedError();
-
-Future<void> removePersistedSession(_) async => throw UnimplementedError();
-
-Future<void> persistSession(_, persistSessionString) async =>
+Future<bool> hasAccessToken(String key) => throw UnimplementedError();
+Future<String?> accessToken(String key) async => throw UnimplementedError();
+Future<void> removePersistedSession(String key) async =>
+    throw UnimplementedError();
+Future<void> persistSession(String key, String persistSessionString) async =>
     throw UnimplementedError();

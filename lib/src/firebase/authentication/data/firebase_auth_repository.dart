@@ -21,11 +21,11 @@ FirebaseAuth firebaseAuth(FirebaseAuthRef ref) {
 }
 
 @Riverpod(keepAlive: true)
-FirebaseAuthRepository authRepository(AuthRepositoryRef ref) {
+FirebaseAuthRepository firebaseAuthRepository(FirebaseAuthRepositoryRef ref) {
   return FirebaseAuthRepository(ref.watch(firebaseAuthProvider));
 }
 
 @riverpod
-Stream<User?> authStateChanges(AuthStateChangesRef ref) {
-  return ref.watch(authRepositoryProvider).authStateChanges();
+Stream<User?> firebaseAuthStateChanges(FirebaseAuthStateChangesRef ref) {
+  return ref.watch(firebaseAuthProvider).authStateChanges();
 }

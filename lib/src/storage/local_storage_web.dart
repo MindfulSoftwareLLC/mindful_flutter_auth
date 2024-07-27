@@ -1,4 +1,3 @@
-// ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 
 final _localStorage = html.window.localStorage;
@@ -13,5 +12,5 @@ Future<void> removePersistedSession(String persistSessionKey) async =>
     _localStorage.remove(persistSessionKey);
 
 Future<void> persistSession(
-        String persistSessionKey, persistSessionString) async =>
+        String persistSessionKey, String persistSessionString) async =>
     _localStorage[persistSessionKey] = persistSessionString;

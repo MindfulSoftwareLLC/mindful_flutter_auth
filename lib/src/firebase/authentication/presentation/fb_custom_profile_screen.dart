@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../auth/presentation/auth_providers.dart';
 
-class CustomProfileScreen extends ConsumerWidget {
-  const CustomProfileScreen({super.key});
+class FBCustomProfileScreen extends ConsumerWidget {
+  const FBCustomProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

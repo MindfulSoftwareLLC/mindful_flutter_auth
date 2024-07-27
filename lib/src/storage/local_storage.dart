@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import './local_storage_stub.dart'
-    if (dart.library.html) './local_storage_web.dart' as web;
+    if (dart.library.html) './local_storage_web.dart' as platform;
 
 const supabasePersistSessionKey = 'SUPABASE_PERSIST_SESSION_KEY';
 
@@ -82,7 +82,7 @@ class SharedPreferencesLocalStorage extends LocalStorage {
   @override
   Future<bool> hasAccessToken() async {
     if (_useWebLocalStorage) {
-      return web.hasAccessToken(persistSessionKey);
+      return platform.hasAccessToken(persistSessionKey);
     }
     return _prefs.containsKey(persistSessionKey);
   }
@@ -90,7 +90,7 @@ class SharedPreferencesLocalStorage extends LocalStorage {
   @override
   Future<String?> accessToken() async {
     if (_useWebLocalStorage) {
-      return web.accessToken(persistSessionKey);
+      return platform.accessToken(persistSessionKey);
     }
     return _prefs.getString(persistSessionKey);
   }
@@ -98,22 +98,23 @@ class SharedPreferencesLocalStorage extends LocalStorage {
   @override
   Future<void> removePersistedSession() async {
     if (_useWebLocalStorage) {
-      web.removePersistedSession(persistSessionKey);
+      await platform.removePersistedSession(persistSessionKey);
     } else {
       await _prefs.remove(persistSessionKey);
     }
   }
 
   @override
-  Future<void> persistSession(String persistSessionString) {
+  Future<void> persistSession(String persistSessionString) async {
     if (_useWebLocalStorage) {
-      return web.persistSession(persistSessionKey, persistSessionString);
+      await platform.persistSession(persistSessionKey, persistSessionString);
+    } else {
+      await _prefs.setString(persistSessionKey, persistSessionString);
     }
-    return _prefs.setString(persistSessionKey, persistSessionString);
   }
 }
 
-/// local storage to store pkce flow code verifier.
+/// Local storage to store PKCE flow code verifier.
 class SharedPreferencesGotrueAsyncStorage extends GotrueAsyncStorage {
   SharedPreferencesGotrueAsyncStorage() {
     _initialize();
