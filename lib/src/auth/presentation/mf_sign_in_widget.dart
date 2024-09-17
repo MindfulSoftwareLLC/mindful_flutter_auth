@@ -1,13 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart' as fbAuth
     hide EmailAuthProvider;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:flutter/material.dart';
 import 'package:mindful_flutter_util/mindful_flutter_util.dart';
 import 'package:supabase_auth_ui/src/utils/constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../mindful_flutter_auth.dart';
+import 'mf_google_signin_button.dart';
 
 /// The callback triggered after signup
 /// The result is an error message, callback successes if message is null
@@ -54,6 +54,8 @@ class MFSignInWidget extends StatefulWidget {
   final String? enterEmailText;
 
   final bool clipLogo;
+  final double logoImageHeight;
+  final double logoClipRadius;
 
   final Map<String, dynamic> userMetaData;
   final String redirectUrl;
@@ -67,6 +69,9 @@ class MFSignInWidget extends StatefulWidget {
   final String? nativeGoogleIosClientId;
   final Map<String, dynamic>? metadata;
   final List<AuthProvider> providers;
+
+  final double loginButtonsHeight;
+  final double loginButtonsWidth = 400;
 
   const MFSignInWidget({
     super.key,
@@ -83,6 +88,8 @@ class MFSignInWidget extends StatefulWidget {
     required this.userMetaData,
     required this.onSuccess,
     required this.onError,
+    this.logoImageHeight = 150,
+    this.logoClipRadius = 999,
     this.logoTag,
     this.titleTag,
     this.savedEmail = '',
@@ -96,6 +103,7 @@ class MFSignInWidget extends StatefulWidget {
     this.unexpectedErrorText = 'Unexpected Error:',
     this.checkYourEmailText = 'Check your email for a link to log in',
     this.metadata = const {},
+    this.loginButtonsHeight = 150,
   });
 
   @override
@@ -110,7 +118,7 @@ class MFSignInWidgetState extends State<MFSignInWidget> {
       logoWidget = widget.logo;
     } else if (widget.logo is String) {
       logoWidget = SizedBox(
-          height: 150,
+          height: widget.logoImageHeight,
           child: Image.network(
             widget.logo,
             fit: BoxFit.scaleDown,
@@ -120,7 +128,8 @@ class MFSignInWidgetState extends State<MFSignInWidget> {
     }
     if (widget.clipLogo) {
       logoWidget = ClipRRect(
-          borderRadius: BorderRadius.circular(999), child: logoWidget);
+          borderRadius: BorderRadius.circular(widget.logoClipRadius),
+          child: logoWidget);
     }
     return Column(
       children: [
@@ -129,15 +138,15 @@ class MFSignInWidgetState extends State<MFSignInWidget> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: SizedBox(
-            height: 150,
-            width: 400,
+            height: widget.loginButtonsHeight,
+            width: widget.loginButtonsWidth,
             child: Column(children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: GoogleSignInButton(
-                  clientId: widget.googleWebClientId,
-                  loadingIndicator: CircularProgressIndicator(),
-                ),
+                child: MFGoogleSignInButton(
+                    googleWebClientId: widget.googleWebClientId,
+                    width: widget.loginButtonsWidth,
+                    height: widget.loginButtonsHeight),
               )
             ]),
             // SignInScreen(

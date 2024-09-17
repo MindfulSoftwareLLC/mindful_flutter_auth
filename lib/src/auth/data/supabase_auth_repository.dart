@@ -1,12 +1,12 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-final authRepositoryProvider = Provider((ref) {
-  return AuthRepository(Supabase.instance.client.auth);
+final supabaseAuthRepositoryProvider = Provider((ref) {
+  return SupabaseAuthRepository(Supabase.instance.client.auth);
 });
 
-class AuthRepository {
-  AuthRepository(this._auth);
+class SupabaseAuthRepository {
+  SupabaseAuthRepository(this._auth);
   final GoTrueClient _auth;
 
   Stream<AuthState?> authStateChanges() => _auth.onAuthStateChange;

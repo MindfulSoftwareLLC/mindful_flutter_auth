@@ -10,6 +10,7 @@ export './src/auth/models/user_form_field.dart';
 export './src/auth/presentation/auth_providers.dart';
 export './src/auth/presentation/custom_profile_screen.dart';
 export './src/auth/presentation/firebase_social_auth.dart';
+export './src/auth/presentation/mf_google_signin_button.dart';
 export './src/auth/presentation/mf_magic_link_login.dart';
 export './src/auth/presentation/mf_oauth_login_buttons.dart';
 export './src/auth/presentation/mf_sign_in_widget.dart';

@@ -8,11 +8,14 @@ part 'auth_providers.g.dart';
 
 @Riverpod(keepAlive: true)
 List<fbAuthUI.AuthProvider<fbAuthUI.AuthListener, AuthCredential>>
-    fbAuthProviders(FbAuthProvidersRef ref) {
-  return [fbAuthUI.EmailAuthProvider(), GoogleProvider(clientId: '')];
+    firebaseAuthProviders(FbAuthProvidersRef ref) {
+  return [
+    fbAuthUI.EmailAuthProvider(),
+    GoogleProvider(clientId: '')
+  ]; //TODO - client id ctor
 }
 
-final fbAuthStateProvider = StreamProvider<User?>(
+final firebaseAuthStateProvider = StreamProvider<User?>(
   (ref) => FirebaseAuth.instance.authStateChanges(),
 );
 

@@ -6,8 +6,8 @@ import '../data/supabase_auth_repository.dart';
 part 'auth_user.g.dart';
 
 @riverpod
-Stream<User?> authUser(AuthUserRef ref) async* {
-  var authRepository = ref.read(authRepositoryProvider);
+Stream<User?> supabaseAuthUser(AuthUserRef ref) async* {
+  var authRepository = ref.read(supabaseAuthRepositoryProvider);
   final authStream = authRepository.authStateChanges();
 
   await for (final authState in authStream) {
