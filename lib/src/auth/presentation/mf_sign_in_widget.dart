@@ -7,7 +7,6 @@ import 'package:supabase_auth_ui/src/utils/constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../mindful_flutter_auth.dart';
-import 'mf_google_signin_button.dart';
 
 /// The callback triggered after signup
 /// The result is an error message, callback successes if message is null
@@ -16,7 +15,7 @@ typedef SignupErrorCallback = Future<void>? Function(dynamic);
 enum LoginService { supabase, firebase }
 
 class MFSignInWidget extends StatefulWidget {
-  final String title;
+  final Widget? titleWidget;
   final dynamic logo;
   final List<MFOAuthProvider> socialProviders;
   final void Function(Object? user) onSuccess;
@@ -48,9 +47,6 @@ class MFSignInWidget extends StatefulWidget {
   /// Default: false
   final bool scrollable;
 
-  /// A widget that can be placed on top of the loginCard.
-  final Widget? headerWidget;
-
   final String? enterEmailText;
 
   final bool clipLogo;
@@ -70,6 +66,8 @@ class MFSignInWidget extends StatefulWidget {
   final Map<String, dynamic>? metadata;
   final List<AuthProvider> providers;
 
+  final double loginHeightBelowLogo;
+  final double loginWidthBelowLogo = 400;
   final double loginButtonsHeight;
   final double loginButtonsWidth = 400;
 
@@ -83,19 +81,18 @@ class MFSignInWidget extends StatefulWidget {
     this.nativeGoogleWebClientId,
     this.nativeGoogleIosClientId,
     required this.redirectUrl,
-    required this.title,
+    required this.titleWidget,
     required this.logo,
     required this.userMetaData,
     required this.onSuccess,
     required this.onError,
-    this.logoImageHeight = 150,
+    this.logoImageHeight = 250,
     this.logoClipRadius = 999,
     this.logoTag,
     this.titleTag,
     this.savedEmail = '',
     this.children,
     this.scrollable = false,
-    this.headerWidget,
     this.enterEmailText,
     this.clipLogo = false,
     this.showSnackBarOnSuccess = true,
@@ -104,6 +101,7 @@ class MFSignInWidget extends StatefulWidget {
     this.checkYourEmailText = 'Check your email for a link to log in',
     this.metadata = const {},
     this.loginButtonsHeight = 150,
+    this.loginHeightBelowLogo = 175,
   });
 
   @override
@@ -121,7 +119,7 @@ class MFSignInWidgetState extends State<MFSignInWidget> {
           height: widget.logoImageHeight,
           child: Image.network(
             widget.logo,
-            fit: BoxFit.scaleDown,
+            fit: BoxFit.cover,
           ));
     } else {
       logoWidget = SizedBox.fromSize();
@@ -133,13 +131,13 @@ class MFSignInWidgetState extends State<MFSignInWidget> {
     }
     return Column(
       children: [
-        widget.title.isEmpty ? SizedBox.fromSize() : Subtitle1(widget.title),
+        widget.titleWidget ?? SizedBox.fromSize(),
         logoWidget!,
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: SizedBox(
-            height: widget.loginButtonsHeight,
-            width: widget.loginButtonsWidth,
+            height: widget.loginHeightBelowLogo,
+            width: widget.loginWidthBelowLogo,
             child: Column(children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),

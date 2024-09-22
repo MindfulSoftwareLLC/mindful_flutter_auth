@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_ui_oauth/firebase_ui_oauth.dart';
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:flutter/material.dart';
 
@@ -5,10 +7,12 @@ class MFGoogleSignInButton extends StatelessWidget {
   const MFGoogleSignInButton({
     super.key,
     required this.googleWebClientId,
+    this.onSignedIn,
     this.width = 220.0,
     this.height = 40.0,
   });
 
+  final SignedInCallback? onSignedIn;
   final String googleWebClientId;
   final double width;
   final double height;
@@ -34,11 +38,15 @@ class MFGoogleSignInButton extends StatelessWidget {
             ),
           ),
           label: 'Sign in/up with Google',
-          onTap: () {
-            // You can add custom logic here if needed
-          },
+          onSignedIn: _onSignIn,
         ),
       ),
     );
+  }
+
+  void _onSignIn(UserCredential credential) {
+    if (onSignedIn != null) {
+      onSignedIn!(credential);
+    }
   }
 }
